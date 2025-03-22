@@ -4,7 +4,7 @@
 **Fecha:** 2025-03-22  
 **Autor:** Carlos Ariel Mammoli  
 **Ubicación:** Mendoza, Argentina  
-**Repositorio:** [GitHub - camammoli/bots](https://github.com/camammoli/bots)
+**Repositorio:** [GitHub - camammoli/climabot](https://github.com/camammoli/climabot)
 
 ClimaBot es un bot de Telegram que permite consultar el estado del clima actual y el pronóstico extendido para cualquier ciudad del mundo. También permite guardar una ciudad favorita por usuario para consultas rápidas.
 
