@@ -1,41 +1,73 @@
 # ClimaBot
 
-**Versión actual:** v2.2  
-**Fecha:** 2025-03-22  
-**Autor:** Carlos Ariel Mammoli  
-**Ubicación:** Mendoza, Argentina  
-**Repositorio:** [GitHub - camammoli/climabot](https://github.com/camammoli/climabot)
+Bot de Telegram para consultar el clima actual y el pronóstico extendido de cualquier ciudad del mundo.
 
-ClimaBot es un bot de Telegram que permite consultar el estado del clima actual y el pronóstico extendido para cualquier ciudad del mundo. También permite guardar una ciudad favorita por usuario para consultas rápidas.
-
-Este bot está desarrollado en Python 3, utiliza la API de OpenWeatherMap y se ejecuta en un entorno Debian. Fue creado como parte de un proyecto personal y asistido en su desarrollo por ChatGPT.
+**No requiere API key** — usa [Open-Meteo](https://open-meteo.com), gratuito y sin registro.
 
 ## Características
 
-- Consultar clima actual con `/weather <ciudad>`
-- Pronóstico extendido de 3 días con `/forecast [ciudad]`
-- Guardar ciudad favorita por usuario con `/setciudad`
-- Obtener el clima de la ciudad guardada con `/ahora`
-- Información de versión (`/version`), ayuda (`/help`) y autor (`/about`)
-- Respuesta enriquecida con emojis según el estado del clima
-
-## Requisitos
-
-- Python 3.9 o superior
-- `python-telegram-bot`
-- `requests`
-- `python-dotenv`
-- Acceso a la API de [OpenWeatherMap](https://openweathermap.org/api)
-- Bot creado en [BotFather](https://t.me/botfather) con su token
-
-## Licencia
-
-Este proyecto está licenciado bajo los términos de la Licencia Pública General GNU v3.0. Ver archivo `LICENSE`.
+- `/weather <ciudad>` — Clima actual (temperatura, sensación térmica, humedad, presión, viento, precipitaciones, amanecer/atardecer)
+- `/forecast [ciudad]` — Pronóstico de 3 días con min/max y precipitaciones
+- `/setciudad <ciudad>` — Guardar ciudad favorita por usuario
+- `/ahora` — Clima de la ciudad favorita guardada
+- Soporte para cualquier ciudad del mundo con geocodificación automática
+- Base de datos SQLite por usuario (sin archivos JSON compartidos)
 
 ## Instalación
 
-Ver archivo `install.md` para detalles paso a paso de instalación y despliegue.
+```bash
+git clone https://github.com/camammoli/climabot.git
+cd climabot
 
-## Mejoras futuras
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
 
-Ver archivo `mejoras_clima.md`.
+cp .env.example .env
+# Editar .env y poner el TELEGRAM_TOKEN
+
+python climabot.py
+```
+
+## Variables de entorno
+
+| Variable | Descripción | Requerida |
+|---|---|---|
+| `TELEGRAM_TOKEN` | Token del bot (obtener en @BotFather) | Sí |
+| `DB_FILE` | Ruta del archivo SQLite | No (default: `climabot.db`) |
+
+## Ejecutar como servicio systemd
+
+```ini
+[Unit]
+Description=ClimaBot Telegram
+After=network.target
+
+[Service]
+Type=simple
+User=tu_usuario
+WorkingDirectory=/ruta/a/climabot
+ExecStart=/ruta/a/climabot/env/bin/python climabot.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo cp climabot.service /etc/systemd/system/
+sudo systemctl enable --now climabot
+```
+
+## Datos meteorológicos
+
+Powered by [Open-Meteo](https://open-meteo.com) — API abierta, sin API key, sin límites de uso para proyectos no comerciales.
+
+## Versión
+
+v3.0 — migración a Open-Meteo, base de datos SQLite, sin dependencia de OpenWeatherMap.
+
+## Licencia
+
+GNU GPL v3.0 — Carlos Ariel Mammoli, Mendoza, Argentina
