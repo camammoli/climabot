@@ -4,6 +4,8 @@ Bot de Telegram para consultar el clima actual y el pronóstico extendido de cua
 
 **No requiere API key** — usa [Open-Meteo](https://open-meteo.com), gratuito y sin registro.
 
+![ClimaBot en acción](climabot.webp)
+
 ## Características
 
 - `/weather <ciudad>` — Clima actual (temperatura, sensación térmica, humedad, presión, viento, precipitaciones, amanecer/atardecer)
