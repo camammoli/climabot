@@ -1,5 +1,7 @@
 # ClimaBot
 
+[![Archivado en Software Heritage](https://archive.softwareheritage.org/badge/origin/https://github.com/camammoli/climabot/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/camammoli/climabot)
+
 Bot de Telegram para consultar el clima actual y el pronóstico extendido de cualquier ciudad del mundo.
 
 **No requiere API key** — usa [Open-Meteo](https://open-meteo.com), gratuito y sin registro.
