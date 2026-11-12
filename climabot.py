@@ -4,10 +4,9 @@ ClimaBot v3.0 — Bot de Telegram para consultar el clima.
 Usa Open-Meteo (https://open-meteo.com) — gratuito, sin API key.
 """
 import os
-import json
 import sqlite3
 import requests
-from datetime import datetime, date
+from datetime import datetime
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
@@ -18,6 +17,7 @@ DB_FILE = os.getenv("DB_FILE", "climabot.db")
 VERSION = "ClimaBot v3.0"
 
 # ── Base de datos ──────────────────────────────────────────────────────────────
+
 
 def init_db():
     con = sqlite3.connect(DB_FILE)
@@ -32,6 +32,7 @@ def init_db():
     con.commit()
     con.close()
 
+
 def guardar_ciudad(user_id: int, ciudad: str, lat: float, lon: float):
     con = sqlite3.connect(DB_FILE)
     con.execute(
@@ -40,6 +41,7 @@ def guardar_ciudad(user_id: int, ciudad: str, lat: float, lon: float):
     )
     con.commit()
     con.close()
+
 
 def obtener_ciudad(user_id: int) -> dict | None:
     con = sqlite3.connect(DB_FILE)
@@ -52,6 +54,7 @@ def obtener_ciudad(user_id: int) -> dict | None:
     return None
 
 # ── Open-Meteo API ─────────────────────────────────────────────────────────────
+
 
 WMO_EMOJIS = {
     0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
@@ -75,6 +78,7 @@ WMO_DESC = {
     95: "Tormenta", 96: "Tormenta con granizo leve", 99: "Tormenta con granizo fuerte",
 }
 
+
 def geocodificar(ciudad: str) -> dict | None:
     """Convierte nombre de ciudad a coordenadas usando Open-Meteo Geocoding."""
     try:
@@ -90,13 +94,14 @@ def geocodificar(ciudad: str) -> dict | None:
         res = resultados[0]
         return {
             "nombre": res.get("name", ciudad),
-            "pais":   res.get("country", ""),
-            "lat":    res["latitude"],
-            "lon":    res["longitude"],
-            "tz":     res.get("timezone", "auto"),
+            "pais": res.get("country", ""),
+            "lat": res["latitude"],
+            "lon": res["longitude"],
+            "tz": res.get("timezone", "auto"),
         }
     except Exception:
         return None
+
 
 def obtener_clima_actual(lat: float, lon: float, tz: str = "auto") -> dict | None:
     try:
@@ -117,6 +122,7 @@ def obtener_clima_actual(lat: float, lon: float, tz: str = "auto") -> dict | Non
     except Exception:
         return None
 
+
 def obtener_pronostico(lat: float, lon: float, tz: str = "auto") -> dict | None:
     try:
         r = requests.get(
@@ -134,14 +140,15 @@ def obtener_pronostico(lat: float, lon: float, tz: str = "auto") -> dict | None:
     except Exception:
         return None
 
+
 def formatear_clima(data: dict, nombre_ciudad: str) -> str:
     cur = data["current"]
     code = cur["weather_code"]
     emoji = WMO_EMOJIS.get(code, "🌤️")
-    desc  = WMO_DESC.get(code, "Desconocido")
+    desc = WMO_DESC.get(code, "Desconocido")
     sunrise = data["daily"]["sunrise"][0][11:16] if data.get("daily") else "—"
-    sunset  = data["daily"]["sunset"][0][11:16]  if data.get("daily") else "—"
-    prec    = cur.get("precipitation", 0)
+    sunset = data["daily"]["sunset"][0][11:16] if data.get("daily") else "—"
+    prec = cur.get("precipitation", 0)
 
     return (
         f"{emoji} *Clima en {nombre_ciudad}*\n"
@@ -155,20 +162,22 @@ def formatear_clima(data: dict, nombre_ciudad: str) -> str:
         f"🌅 Amanecer: {sunrise} | 🌇 Atardecer: {sunset}"
     )
 
+
 DIAS_ES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+
 
 def formatear_pronostico(data: dict, nombre_ciudad: str) -> str:
     daily = data["daily"]
     lineas = [f"📅 *Pronóstico para {nombre_ciudad}*\n"]
     for i in range(1, min(4, len(daily["time"]))):
         fecha = datetime.strptime(daily["time"][i], "%Y-%m-%d")
-        dia   = DIAS_ES[fecha.weekday()]
-        code  = daily["weather_code"][i]
+        dia = DIAS_ES[fecha.weekday()]
+        code = daily["weather_code"][i]
         emoji = WMO_EMOJIS.get(code, "🌤️")
-        desc  = WMO_DESC.get(code, "Desconocido")
-        tmax  = daily["temperature_2m_max"][i]
-        tmin  = daily["temperature_2m_min"][i]
-        prec  = daily["precipitation_sum"][i]
+        desc = WMO_DESC.get(code, "Desconocido")
+        tmax = daily["temperature_2m_max"][i]
+        tmin = daily["temperature_2m_min"][i]
+        prec = daily["precipitation_sum"][i]
         lineas.append(
             f"🗓️ *{dia} {fecha.strftime('%d/%m')}*\n"
             f"{emoji} {desc}\n"
@@ -178,12 +187,14 @@ def formatear_pronostico(data: dict, nombre_ciudad: str) -> str:
 
 # ── Comandos ───────────────────────────────────────────────────────────────────
 
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🌦️ *ClimaBot* — clima en tiempo real sin API key\n\n"
         "Usá /help para ver los comandos.",
         parse_mode="Markdown",
     )
+
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -197,8 +208,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="MarkdownV2",
     )
 
+
 async def version(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"🛠️ {VERSION}")
+
 
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -209,6 +222,7 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="MarkdownV2",
         disable_web_page_preview=True,
     )
+
 
 async def setciudad(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
@@ -225,6 +239,7 @@ async def setciudad(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
     )
 
+
 async def ahora(update: Update, context: ContextTypes.DEFAULT_TYPE):
     fav = obtener_ciudad(update.effective_user.id)
     if not fav:
@@ -235,6 +250,7 @@ async def ahora(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ No se pudo obtener el clima. Intentá de nuevo.")
         return
     await update.message.reply_text(formatear_clima(data, fav["ciudad"]), parse_mode="Markdown")
+
 
 async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args:
@@ -251,6 +267,7 @@ async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     nombre = f"{geo['nombre']}, {geo['pais']}"
     await update.message.reply_text(formatear_clima(data, nombre), parse_mode="Markdown")
+
 
 async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args:
@@ -277,21 +294,23 @@ async def forecast(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 
+
 def main():
     if not TELEGRAM_TOKEN:
         raise RuntimeError("TELEGRAM_TOKEN no configurado en .env")
     init_db()
     app = Application.builder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(CommandHandler("start",    start))
-    app.add_handler(CommandHandler("help",     help_command))
-    app.add_handler(CommandHandler("version",  version))
-    app.add_handler(CommandHandler("about",    about))
-    app.add_handler(CommandHandler("weather",  weather))
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("version", version))
+    app.add_handler(CommandHandler("about", about))
+    app.add_handler(CommandHandler("weather", weather))
     app.add_handler(CommandHandler("forecast", forecast))
     app.add_handler(CommandHandler("setciudad", setciudad))
-    app.add_handler(CommandHandler("ahora",    ahora))
+    app.add_handler(CommandHandler("ahora", ahora))
     print(f"☁️  {VERSION} iniciado...")
     app.run_polling()
+
 
 if __name__ == "__main__":
     main()

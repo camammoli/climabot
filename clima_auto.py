@@ -17,27 +17,36 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = int(os.getenv("TELEGRAM_CHAT_ID", "0"))
 # ------------------------------------------------
 
+
 def obtener_emoji(desc):
     desc = desc.lower()
-    if "lluvia" in desc: return "🌧️"
-    elif "nublado" in desc: return "☁️"
-    elif "despejado" in desc: return "☀️"
-    elif "tormenta" in desc: return "⛈️"
-    elif "nieve" in desc: return "❄️"
+    if "lluvia" in desc:
+        return "🌧️"
+    elif "nublado" in desc:
+        return "☁️"
+    elif "despejado" in desc:
+        return "☀️"
+    elif "tormenta" in desc:
+        return "⛈️"
+    elif "nieve" in desc:
+        return "❄️"
     return "🌤️"
+
 
 def obtener_ciudad_favorita():
     try:
         with open(CIUDADES_FILE, "r") as f:
             ciudades = json.load(f)
             return ciudades.get("124659252")  # tu user_id
-    except:
+    except Exception:
         return None
+
 
 def enviar_mensaje_telegram(texto):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     data = {"chat_id": TELEGRAM_CHAT_ID, "text": texto, "parse_mode": "Markdown"}
     requests.post(url, data=data)
+
 
 def obtener_forecast(ciudad):
     ciudad_encoded = quote(ciudad)
@@ -83,6 +92,7 @@ def obtener_forecast(ciudad):
 
     return mensaje
 
+
 def main():
     ciudad = obtener_ciudad_favorita()
     if not ciudad:
@@ -94,6 +104,7 @@ def main():
         enviar_mensaje_telegram(mensaje)
     except Exception as e:
         enviar_mensaje_telegram(f"❌ Error al obtener el pronóstico:\n`{e}`")
+
 
 if __name__ == "__main__":
     main()
